@@ -230,6 +230,17 @@
                 </div>
             </div>
             
+            <!-- ADDED REMINDER DROPDOWN -->
+            <div class="form-group">
+                <label>Reminder</label>
+                <select id="reminderTime">
+                    <option value="5">5 minutes before</option>
+                    <option value="10" selected>10 minutes before</option>
+                    <option value="15">15 minutes before</option>
+                    <option value="0">No reminder</option>
+                </select>
+            </div>
+            
             <div class="form-group">
                 <label>Add to Calendar</label>
                 <div class="provider-grid">
@@ -261,7 +272,7 @@
             <div style="display: grid; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <span style="color: var(--accent);">⏰</span>
-                    <span>5-minute early reminder</span>
+                    <span>Customizable reminder</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <span style="color: var(--accent);">🔄</span>
@@ -327,6 +338,7 @@
         function updateCalendarLinks() {
             const startTime = document.getElementById('startTime').value;
             const blockName = document.getElementById('blockName').value || 'Output Ops Block';
+            const reminderTime = document.getElementById('reminderTime').value;
             const [hours, minutes] = startTime.split(':');
             
             // Calculate end time
@@ -343,17 +355,17 @@
             const startDate = `${nextMonday}T${hours}${minutes}00`;
             const endDate = `${nextMonday}T${endHours.toString().padStart(2, '0')}${endMinutes.toString().padStart(2, '0')}00`;
             
-            // Google Calendar Link
-            const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(blockName)}&dates=${startDate}/${endDate}&recur=RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR&details=${encodeURIComponent('50-minute focused work block for Output Ops')}`;
+            // Google Calendar Link - ADDED REMINDER PARAMETER
+            const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(blockName)}&dates=${startDate}/${endDate}&recur=RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR&details=${encodeURIComponent('50-minute focused work block for Output Ops')}&reminder=${reminderTime}M`;
             document.getElementById('googleBtn').href = googleUrl;
             
-            // Outlook Link
-            const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(blockName)}&startdt=${nextMonday}T${hours}:${minutes}:00&enddt=${nextMonday}T${endHours}:${endMinutes}:00&recurrence=WEEKLY;BYDAY=MO,TU,WE,TH,FR&body=${encodeURIComponent('50-minute focused work block')}`;
+            // Outlook Link - ADDED REMINDER PARAMETER
+            const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(blockName)}&startdt=${nextMonday}T${hours}:${minutes}:00&enddt=${nextMonday}T${endHours}:${endMinutes}:00&recurrence=WEEKLY;BYDAY=MO,TU,WE,TH,FR&body=${encodeURIComponent('50-minute focused work block')}&reminderminutes=${reminderTime}`;
             document.getElementById('outlookBtn').href = outlookUrl;
             
-            // Apple Calendar (ICS download)
-            document.getElementById('appleBtn').onclick = () => downloadICS(blockName, startDate, endDate);
-            document.getElementById('icsBtn').onclick = () => downloadICS(blockName, startDate, endDate);
+            // Apple Calendar (ICS download) - UPDATED TO INCLUDE REMINDER
+            document.getElementById('appleBtn').onclick = () => downloadICS(blockName, startDate, endDate, reminderTime);
+            document.getElementById('icsBtn').onclick = () => downloadICS(blockName, startDate, endDate, reminderTime);
         }
         
         function getNextMonday() {
@@ -365,8 +377,8 @@
             return nextMonday.toISOString().split('T')[0].replace(/-/g, '');
         }
         
-        function downloadICS(blockName, startDate, endDate) {
-            const icsContent = `BEGIN:VCALENDAR
+        function downloadICS(blockName, startDate, endDate, reminderTime) {
+            let icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Output Ops//Block Generator//EN
 BEGIN:VEVENT
@@ -374,7 +386,19 @@ SUMMARY:${blockName}
 DESCRIPTION:50-minute focused work block for Output Ops
 DTSTART:${startDate}
 DTEND:${endDate}
-RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR
+RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR`;
+
+            // ADD REMINDER ALARM IF NOT ZERO
+            if (reminderTime !== "0") {
+                icsContent += `
+BEGIN:VALARM
+TRIGGER:-PT${reminderTime}M
+ACTION:DISPLAY
+DESCRIPTION:Output Ops Block starting soon
+END:VALARM`;
+            }
+
+            icsContent += `
 END:VEVENT
 END:VCALENDAR`.replace(/\n/g, '\r\n');
 
@@ -390,6 +414,7 @@ END:VCALENDAR`.replace(/\n/g, '\r\n');
         // Initialize
         document.getElementById('startTime').addEventListener('change', updateEndTime);
         document.getElementById('blockName').addEventListener('input', updatePreview);
+        document.getElementById('reminderTime').addEventListener('change', updateCalendarLinks);
         
         // Add change listeners to day checkboxes
         ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(day => {
