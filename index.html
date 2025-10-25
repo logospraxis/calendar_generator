@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Block Generator - Output Ops</title>
+    <style>
+        body {
+            background: #0B0B0C;
+            color: #E5E7EB;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        h3 {
+            color: #E5E7EB;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        
+        input, button {
+            background: rgba(229, 231, 235, 0.03);
+            border: 1px solid rgba(229, 231, 235, 0.28);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #E5E7EB;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #2563EB;
+        }
+        
+        button {
+            background: #2563EB;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        
+        button:hover {
+            background: #1e40af;
+        }
+        
+        .note {
+            color: #9CA3AF;
+            font-size: 14px;
+            margin-top: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h3>Generate Your 50-Min Blocks</h3>
+    <input type="time" id="blockTime" value="09:00">
+    <button onclick="generateICS()">Download Calendar File</button>
+    <div class="note">Import this to your calendar app</div>
+
+    <script>
+    function generateICS() {
+        const time = document.getElementById('blockTime').value;
+        const [hours, minutes] = time.split(':');
+        
+        // Calculate end time (50 minutes later)
+        let endHours = parseInt(hours);
+        let endMinutes = parseInt(minutes) + 50;
+        if (endMinutes >= 60) {
+            endHours += 1;
+            endMinutes -= 60;
+        }
+        
+        const endTime = `${endHours.toString().padStart(2, '0')}${endMinutes.toString().padStart(2, '0')}`;
+        
+        const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Output Ops//Block Generator//EN
+BEGIN:VEVENT
+SUMMARY:Output Ops Block
+DESCRIPTION:50-minute focused work block
+DTSTART:20241028T${hours}${minutes}00
+DTEND:20241028T${endTime}00
+RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR
+END:VEVENT
+END:VCALENDAR`.replace(/\n/g, '\r\n');
+
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'output-ops-blocks.ics';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    </script>
+</body>
+</html>
