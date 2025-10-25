@@ -1,102 +1,402 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Block Generator - Output Ops</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Your Blocks - Output Ops</title>
     <style>
+        :root {
+            --bg: #0B0B0C;
+            --ink: #E5E7EB;
+            --muted: #9CA3AF;
+            --stroke: rgba(229,231,235,0.28);
+            --accent: #2563EB;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            background: #0B0B0C;
-            color: #E5E7EB;
+            background: var(--bg);
+            color: var(--ink);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            max-width: 500px;
-            margin: 40px auto;
-            padding: 20px;
             line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
         }
         
-        h3 {
-            color: #E5E7EB;
-            font-size: 24px;
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        h1 {
+            font-size: 28px;
             font-weight: 700;
-            margin-bottom: 24px;
+            margin-bottom: 8px;
+            color: var(--ink);
         }
         
-        input, button {
+        .subtitle {
+            color: var(--muted);
+            font-size: 16px;
+        }
+        
+        .card {
             background: rgba(229, 231, 235, 0.03);
-            border: 1px solid rgba(229, 231, 235, 0.28);
+            border: 1px solid var(--stroke);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--ink);
+        }
+        
+        input, select {
+            width: 100%;
+            background: rgba(229, 231, 235, 0.05);
+            border: 1px solid var(--stroke);
             border-radius: 8px;
             padding: 12px 16px;
-            color: #E5E7EB;
+            color: var(--ink);
             font-size: 16px;
-            width: 100%;
-            margin-bottom: 16px;
         }
         
-        input:focus {
+        input:focus, select:focus {
             outline: none;
-            border-color: #2563EB;
+            border-color: var(--accent);
         }
         
-        button {
-            background: #2563EB;
-            color: white;
+        .time-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .time-separator {
+            color: var(--muted);
             font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease;
         }
         
-        button:hover {
-            background: #1e40af;
+        .provider-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .provider-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: rgba(229, 231, 235, 0.05);
+            border: 1px solid var(--stroke);
+            border-radius: 8px;
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .provider-btn:hover {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: var(--accent);
+        }
+        
+        .preview {
+            background: rgba(37, 99, 235, 0.05);
+            border-left: 4px solid var(--accent);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .preview h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent);
+        }
+        
+        .preview-details {
+            color: var(--muted);
+            font-size: 14px;
         }
         
         .note {
-            color: #9CA3AF;
+            color: var(--muted);
             font-size: 14px;
-            margin-top: 8px;
             text-align: center;
+            margin-top: 20px;
+        }
+        
+        .days-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .day-checkbox {
+            flex: 1;
+            min-width: 60px;
+        }
+        
+        .day-checkbox input {
+            display: none;
+        }
+        
+        .day-checkbox label {
+            display: block;
+            text-align: center;
+            padding: 8px 12px;
+            background: rgba(229, 231, 235, 0.05);
+            border: 1px solid var(--stroke);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .day-checkbox input:checked + label {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
         }
     </style>
 </head>
 <body>
-    <h3>Generate Your 50-Min Blocks</h3>
-    <input type="time" id="blockTime" value="09:00">
-    <button onclick="generateICS()">Download Calendar File</button>
-    <div class="note">Import this to your calendar app</div>
+    <div class="container">
+        <div class="header">
+            <h1>Schedule Your Focus Blocks</h1>
+            <p class="subtitle">Set your 50-minute blocks and add them directly to your calendar</p>
+        </div>
+        
+        <div class="card">
+            <div class="form-group">
+                <label for="blockName">Block Name</label>
+                <input type="text" id="blockName" value="Output Ops Block" placeholder="Name your focus block">
+            </div>
+            
+            <div class="form-group">
+                <label>Days of the Week</label>
+                <div class="days-selector">
+                    <div class="day-checkbox">
+                        <input type="checkbox" id="mon" checked>
+                        <label for="mon">Mon</label>
+                    </div>
+                    <div class="day-checkbox">
+                        <input type="checkbox" id="tue" checked>
+                        <label for="tue">Tue</label>
+                    </div>
+                    <div class="day-checkbox">
+                        <input type="checkbox" id="wed" checked>
+                        <label for="wed">Wed</label>
+                    </div>
+                    <div class="day-checkbox">
+                        <input type="checkbox" id="thu" checked>
+                        <label for="thu">Thu</label>
+                    </div>
+                    <div class="day-checkbox">
+                        <input type="checkbox" id="fri" checked>
+                        <label for="fri">Fri</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Block Time</label>
+                <div class="time-row">
+                    <input type="time" id="startTime" value="09:00">
+                    <div class="time-separator">→</div>
+                    <input type="time" id="endTime" value="09:50" readonly>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Add to Calendar</label>
+                <div class="provider-grid">
+                    <a href="#" class="provider-btn" id="googleBtn">
+                        <span>📅</span> Google Calendar
+                    </a>
+                    <a href="#" class="provider-btn" id="outlookBtn">
+                        <span>📧</span> Outlook
+                    </a>
+                    <a href="#" class="provider-btn" id="appleBtn">
+                        <span>🍎</span> Apple Calendar
+                    </a>
+                    <a href="#" class="provider-btn" id="icsBtn">
+                        <span>📥</span> Download ICS
+                    </a>
+                </div>
+            </div>
+            
+            <div class="preview" id="preview">
+                <h3>Block Preview</h3>
+                <div class="preview-details" id="previewDetails">
+                    Mon-Fri, 9:00 AM - 9:50 AM
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3 style="margin-bottom: 16px;">Accountability Features</h3>
+            <div style="display: grid; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="color: var(--accent);">⏰</span>
+                    <span>5-minute early reminder</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="color: var(--accent);">🔄</span>
+                    <span>Auto-repeats weekly</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="color: var(--accent);">📝</span>
+                    <span>Description includes your commitment</span>
+                </div>
+            </div>
+        </div>
+        
+        <p class="note">Your blocks will be scheduled starting next Monday</p>
+    </div>
 
     <script>
-    function generateICS() {
-        const time = document.getElementById('blockTime').value;
-        const [hours, minutes] = time.split(':');
-        
-        // Calculate end time (50 minutes later)
-        let endHours = parseInt(hours);
-        let endMinutes = parseInt(minutes) + 50;
-        if (endMinutes >= 60) {
-            endHours += 1;
-            endMinutes -= 60;
+        function updateEndTime() {
+            const startTime = document.getElementById('startTime').value;
+            const [hours, minutes] = startTime.split(':');
+            
+            let endHours = parseInt(hours);
+            let endMinutes = parseInt(minutes) + 50;
+            
+            if (endMinutes >= 60) {
+                endHours += 1;
+                endMinutes -= 60;
+            }
+            
+            const endTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+            document.getElementById('endTime').value = endTime;
+            updatePreview();
         }
         
-        const endTime = `${endHours.toString().padStart(2, '0')}${endMinutes.toString().padStart(2, '0')}`;
+        function updatePreview() {
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const days = getSelectedDays();
+            
+            const preview = `${days}, ${formatTime(startTime)} - ${formatTime(endTime)}`;
+            document.getElementById('previewDetails').textContent = preview;
+            
+            updateCalendarLinks();
+        }
         
-        const icsContent = `BEGIN:VCALENDAR
+        function getSelectedDays() {
+            const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
+            const selected = days.filter(day => document.getElementById(day).checked);
+            
+            if (selected.length === 5) return 'Mon-Fri';
+            if (selected.length === 0) return 'No days selected';
+            
+            return selected.map(day => day.charAt(0).toUpperCase() + day.slice(1)).join(', ');
+        }
+        
+        function formatTime(time) {
+            const [hours, minutes] = time.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour % 12 || 12;
+            return `${displayHour}:${minutes} ${ampm}`;
+        }
+        
+        function updateCalendarLinks() {
+            const startTime = document.getElementById('startTime').value;
+            const blockName = document.getElementById('blockName').value || 'Output Ops Block';
+            const [hours, minutes] = startTime.split(':');
+            
+            // Calculate end time
+            let endHours = parseInt(hours);
+            let endMinutes = parseInt(minutes) + 50;
+            if (endMinutes >= 60) {
+                endHours += 1;
+                endMinutes -= 60;
+            }
+            const endTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+            
+            // Get next Monday
+            const nextMonday = getNextMonday();
+            const startDate = `${nextMonday}T${hours}${minutes}00`;
+            const endDate = `${nextMonday}T${endHours.toString().padStart(2, '0')}${endMinutes.toString().padStart(2, '0')}00`;
+            
+            // Google Calendar Link
+            const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(blockName)}&dates=${startDate}/${endDate}&recur=RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR&details=${encodeURIComponent('50-minute focused work block for Output Ops')}`;
+            document.getElementById('googleBtn').href = googleUrl;
+            
+            // Outlook Link
+            const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(blockName)}&startdt=${nextMonday}T${hours}:${minutes}:00&enddt=${nextMonday}T${endHours}:${endMinutes}:00&recurrence=WEEKLY;BYDAY=MO,TU,WE,TH,FR&body=${encodeURIComponent('50-minute focused work block')}`;
+            document.getElementById('outlookBtn').href = outlookUrl;
+            
+            // Apple Calendar (ICS download)
+            document.getElementById('appleBtn').onclick = () => downloadICS(blockName, startDate, endDate);
+            document.getElementById('icsBtn').onclick = () => downloadICS(blockName, startDate, endDate);
+        }
+        
+        function getNextMonday() {
+            const today = new Date();
+            const day = today.getDay();
+            const diff = day === 0 ? 1 : 8 - day; // If Sunday, next day is Monday (1), else days until next Monday
+            const nextMonday = new Date(today);
+            nextMonday.setDate(today.getDate() + diff);
+            return nextMonday.toISOString().split('T')[0].replace(/-/g, '');
+        }
+        
+        function downloadICS(blockName, startDate, endDate) {
+            const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Output Ops//Block Generator//EN
 BEGIN:VEVENT
-SUMMARY:Output Ops Block
-DESCRIPTION:50-minute focused work block
-DTSTART:20241028T${hours}${minutes}00
-DTEND:20241028T${endTime}00
+SUMMARY:${blockName}
+DESCRIPTION:50-minute focused work block for Output Ops
+DTSTART:${startDate}
+DTEND:${endDate}
 RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR
 END:VEVENT
 END:VCALENDAR`.replace(/\n/g, '\r\n');
 
-        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'output-ops-blocks.ics';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'output-ops-blocks.ics';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Initialize
+        document.getElementById('startTime').addEventListener('change', updateEndTime);
+        document.getElementById('blockName').addEventListener('input', updatePreview);
+        
+        // Add change listeners to day checkboxes
+        ['mon', 'tue', 'wed', 'thu', 'fri'].forEach(day => {
+            document.getElementById(day).addEventListener('change', updatePreview);
+        });
+        
+        updateEndTime(); // Initial call
     </script>
 </body>
 </html>
